@@ -11,11 +11,11 @@ st.write("Esta aplicación procesa las variables de entrada y realiza prediccion
 # Opción de navegación en barra lateral
 opcion = st.sidebar.selectbox("Selecciona el modo de uso:", ["Predicción Individual", "Cargar Archivo Excel (Lote)"])
 
-# Cargar artefactos de forma robusta con rutas absolutas
+# Cargar artefactos utilizando las rutas originales
 try:
-    one_hot_transformer = joblib.load('/content/one_hot_columns.joblib')
-    scaler = joblib.load('/content/min_max_scaler.joblib')
-    model = joblib.load('/content/bagging_optimizado.joblib')
+    one_hot_transformer = joblib.load('one_hot_columns.joblib')
+    scaler = joblib.load('min_max_scaler.joblib')
+    model = joblib.load('bagging_optimizado.joblib')
 except Exception as e:
     st.error(f"Error crítico al cargar artefactos: {e}")
     st.stop()
@@ -82,44 +82,4 @@ if opcion == "Predicción Individual":
             df_proc, pred = result
             st.subheader("Datos Procesados para el Modelo")
             st.dataframe(df_proc)
-            st.success(f"La predicción del modelo (Nota Final Estimada) es: **{pred[0]:.4f}**")
-
-else:
-    st.header("Cargar Archivo Excel para Predicciones en Lote")
-    st.write("El archivo Excel debe contener las columnas: **Felder** y **Examen_admisión** (puede contener opcionalmente ID y Año - Semestre).")
-    
-    uploaded_file = st.file_uploader("Sube tu archivo Excel (.xlsx)", type=["xlsx"])
-    
-    if uploaded_file is not None:
-        try:
-            df_excel = pd.read_excel(uploaded_file)
-            st.subheader("Vista previa de los datos subidos:")
-            st.dataframe(df_excel.head())
-            
-            if st.button("Procesar y Predecir Archivo"):
-                result = procesar_y_predecir(df_excel)
-                if result is not None:
-                    df_proc, preds = result
-                    
-                    # Crear dataframe final con resultados añadidos
-                    df_resultado = df_excel.copy()
-                    df_resultado['Nota_Final_Predicha'] = preds
-                    
-                    st.success("¡Predicciones generadas con éxito!")
-                    st.subheader("Resultados Finales:")
-                    st.dataframe(df_resultado)
-                    
-                    # Permitir descargar el resultado procesado en Excel
-                    import io
-                    buffer = io.BytesIO()
-                    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                        df_resultado.to_excel(writer, index=False, sheet_name='Predicciones')
-                    
-                    st.download_button(
-                        label="Descargar Excel de Resultados",
-                        data=buffer.getvalue(),
-                        file_name="predicciones_notas_finales.xlsx",
-                        mime="application/vnd.ms-excel"
-                    )
-        except Exception as e:
-            st.error(f"Error al leer o procesar el archivo Excel: {e}")
+            st.success(f
